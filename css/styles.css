@@ -79,6 +79,17 @@ select.form-input {
   padding-right: 2.5rem;
 }
 
+select.form-input option {
+  background: #1e293b;
+  color: #f1f5f9;
+  padding: 0.5rem;
+}
+
+select.form-input option:checked {
+  background: #f59e0b;
+  color: #0f172a;
+}
+
 /* --- Add Button --- */
 .btn-add {
   display: flex;
