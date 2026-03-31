@@ -122,10 +122,18 @@ function renderPreview() {
     </div>`;
   }
 
+  // Modifiers
+  const season = document.getElementById('season')?.value || 'summer';
+  const seasonMap = { summer: '☀️ Verano', autumn: '🍂 Otoño', winter: '❄️ Invierno', spring: '🌸 Primavera' };
+  const seasonStr = seasonMap[season];
+  const nightWork = document.getElementById('nightWork')?.checked || false;
+
   // Timeline
   html += `<div class="preview-section">
     <h2>📅 PLAZO ESTIMADO</h2>
-    <p class="text-xs"><b>Días calendario estimados:</b> ${days} días (incluye secado y clima)</p>
+    <p class="text-sm pb-1"><b>Días calendario estimados:</b> ${days} días (incluye secado técnico)</p>
+    <p class="text-xs text-slate-500">▶ <b>Época programada:</b> ${seasonStr} (Margen de lluvia y humedad aplicado al presupuesto)</p>
+    ${nightWork ? `<p class="text-xs text-brand-500 mt-1">▶ <b>Modalidad:</b> Trabajo Nocturno (Jornada más costosa, acorta tiempos calendario)</p>` : ''}
   </div>`;
 
   // Grand Total
@@ -317,11 +325,17 @@ function shareWhatsApp() {
 
   // ── PLAZO ──
   L.push(`━━━━━━━━━━━━━━━━━━━━`);
-  L.push(`📅 *PLAZO ESTIMADO*`);
+  L.push(`🗓️ *PLAZO ESTIMADO*`);
   L.push(`━━━━━━━━━━━━━━━━━━━━`);
-  L.push(``);
-  L.push(`  🗓️ *~${days} días* calendario`);
-  L.push(`  _(incluye tiempos de secado y clima)_`);
+  
+  const season = document.getElementById('season')?.value || 'summer';
+  const seasonMap = { summer: '☀️ Verano', autumn: '🍂 Otoño', winter: '❄️ Invierno', spring: '🌸 Primavera' };
+  const nightWork = document.getElementById('nightWork')?.checked || false;
+
+  L.push(`▸ *Días calendario totales:* ${days} días`);
+  L.push(`▸ *Época programada:* ${seasonMap[season]}`);
+  if (nightWork) L.push(`▸ *Modalidad:* Trabajo Nocturno`);
+  L.push(`   *(Sujeto a demoras climáticas)*`);
   L.push(``);
 
   // ── TOTAL ──
