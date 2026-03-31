@@ -110,9 +110,31 @@ function calcPlasterMaterials(ceilingArea, zones) {
 
   const cutsApprox = type === 'continuo' ? stdPlates : customPlatesWithMargin;
 
-  const materials = [
-    { name: 'Placa yeso 9.5mm (1.20×2.40m)', qty: stdPlates, unit: 'unidades', price: 0 },
-    { name: 'Masilla tapa juntas', qty: Math.ceil(surfaceM2 / 2.5 * 1.1), unit: 'kg', price: 0 },
+  let materials = [
+    { name: 'Placa yeso 9.5mm (1.20×2.40m)', qty: stdPlates, unit: 'unidades', price: 0 }
+  ];
+
+  if (type === 'continuo') {
+    // Calculos según manuales técnicos (normas Durlock/Knauf / ISO) por m²
+    // Separación montantes cada 40cm para cielorraso estándar
+    materials = materials.concat([
+      { name: 'Masilla tapa juntas (Nóminal: 0.9kg/m²)', qty: Math.ceil(surfaceM2 * 0.9), unit: 'kg', price: 0 },
+      { name: 'Soleras 35mm (2.60m) - 0.38 un/m²', qty: Math.ceil(surfaceM2 * 0.38), unit: 'tiras', price: 0 },
+      { name: 'Montantes 34mm (2.60m) - 1.20 un/m²', qty: Math.ceil(surfaceM2 * 1.20), unit: 'tiras', price: 0 },
+      { name: 'Tornillos T1 (Estructura) - 18 un/m²', qty: Math.ceil(surfaceM2 * 18), unit: 'unidades', price: 0 },
+      { name: 'Tornillos T2 (Placas) - 20 un/m²', qty: Math.ceil(surfaceM2 * 20), unit: 'unidades', price: 0 },
+      { name: 'Cinta papel/tramada (Rollo 90m) - 1.65m/m²', qty: Math.ceil((surfaceM2 * 1.65) / 90), unit: 'rollos', price: 0 },
+      { name: 'Fijaciones y Tarugo Nº8 - 6 un/m²', qty: Math.ceil(surfaceM2 * 6), unit: 'unidades', price: 0 },
+      { name: 'Alambre galv. Nº14 (Tensores) - 0.15kg/m²', qty: Math.ceil(surfaceM2 * 0.15), unit: 'kg', price: 0 },
+    ]);
+  } else {
+    // Para placas modulares mantengo estimaciones de masilla simplificadas
+    materials = materials.concat([
+      { name: 'Masilla tapa juntas', qty: Math.ceil(surfaceM2 * 0.44), unit: 'kg', price: 0 }
+    ]);
+  }
+
+  materials = materials.concat([
     { name: 'Lija grano 150', qty: Math.ceil(cutsApprox / (type === 'continuo' ? 4 : 10)), unit: 'hojas', price: 0 },
     { name: 'Lija grano 220', qty: Math.ceil(cutsApprox / (type === 'continuo' ? 5 : 12)), unit: 'hojas', price: 0 },
     { name: 'Sellador fijador', qty: Math.ceil(surfaceM2 / 10), unit: 'litros', price: 0 },
@@ -120,8 +142,8 @@ function calcPlasterMaterials(ceilingArea, zones) {
     { name: 'Hojas trincheta', qty: Math.ceil(cutsApprox / (type === 'continuo' ? 5 : 15)), unit: 'unidades', price: 0 },
     { name: 'Barbijos/máscaras', qty: Math.max(1, Math.ceil(cutsApprox / 30)), unit: 'unidades', price: 0 },
     { name: 'Rodillo pelo corto 22cm', qty: 1, unit: 'unidad', price: 0 },
-    { name: 'Bandeja rodillo', qty: 1, unit: 'unidad', price: 0 },
-  ];
+    { name: 'Bandeja rodillo', qty: 1, unit: 'unidad', price: 0 }
+  ]);
 
   renderMaterialsTable('plasterMaterialsBody', materials, 'plasterMaterialsTotal', 'plaster');
 }
