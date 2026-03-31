@@ -176,11 +176,23 @@ function calculateTimeline() {
     </div>`;
   }).join('');
 
-  // Update summary
-  document.getElementById('totalJornales').textContent = fmtNum(totalJornales, 1);
-  document.getElementById('totalDays').textContent = baseDays + ' días';
-  document.getElementById('rainDays').textContent = '+' + rainDaysExtra + ' días';
-  document.getElementById('calendarDays').textContent = calendarDays + ' días';
+  // Use getLaborData to sync the final, fully-injected reality
+  const labor = getLaborData();
+  // We calculate days based on the final injected total of working shifts:
+  const effectiveWorkDays = Math.ceil(labor.totalJornales / numWorkers);
+  
+  // Back-calculate the pure rain days to display the "+ X días" note safely
+  const pureJornales = stages.reduce((s, st) => s + st.jornales, 0);
+  const pureBaseDays = Math.ceil(pureJornales / numWorkers);
+  const actualRainDaysExtra = Math.ceil(pureBaseDays * (labor.rainFactor - 1));
+  
+  // Total calendar block
+  const actualCalendarDays = effectiveWorkDays + dryingDays;
+
+  document.getElementById('totalJornales').textContent = fmtNum(labor.totalJornales, 1);
+  document.getElementById('totalDays').textContent = effectiveWorkDays + ' días';
+  document.getElementById('rainDays').textContent = '+' + actualRainDaysExtra + ' días';
+  document.getElementById('calendarDays').textContent = actualCalendarDays + ' días';
 }
 
 function getLaborData() {
@@ -228,10 +240,20 @@ function getLaborData() {
   // Calculate cost: distribute jornales across workers proportionally
   const avgRate = workers.length ? workers.reduce((s, w) => s + w.rate, 0) / workers.length : 0;
   
-  // Night work surcharge: 40% extra for nocturnal shifts
+  // Night work modifiers
   const nightWork = document.getElementById('nightWork')?.checked || false;
   const nightSurcharge = nightWork ? 1.4 : 1;
-  const total = totalJornales * avgRate * nightSurcharge;
+  const nightFactor = nightWork ? 0.7 : 1; 
 
-  return { totalJornales, avgRate, total, workers, nightWork, nightSurcharge };
+  // Weather/Season modifiers
+  const season = document.getElementById('season')?.value || 'summer';
+  const RAIN_FACTORS = { summer: 1.15, autumn: 1.25, winter: 1.20, spring: 1.20 };
+  const rainFactor = RAIN_FACTORS[season] || 1;
+
+  // Final adjusted mathematical shifts payable
+  const finalJornales = totalJornales * rainFactor * nightFactor;
+  // Calculate total monetary value
+  const total = finalJornales * avgRate * nightSurcharge;
+
+  return { totalJornales: finalJornales, avgRate, total, workers, nightWork, nightSurcharge, rainFactor, nightFactor };
 }

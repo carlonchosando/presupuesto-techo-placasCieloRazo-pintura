@@ -461,7 +461,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           <div class="form-group">
             <label class="form-label" for="season">Época del año</label>
-            <select id="season" class="form-input">
+            <select id="season" class="form-input" onchange="if(typeof calculateTimeline==='function') calculateTimeline()">
               <option value="summer">☀️ Verano (Dic-Feb)</option>
               <option value="autumn">🍂 Otoño (Mar-May)</option>
               <option value="winter">❄️ Invierno (Jun-Ago)</option>
@@ -472,7 +472,7 @@
             <label class="form-label">Trabajo nocturno</label>
             <div class="flex items-center gap-3 mt-2">
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" id="nightWork" class="sr-only peer">
+                <input type="checkbox" id="nightWork" class="sr-only peer" onchange="if(typeof calculateTimeline==='function') calculateTimeline()">
                 <div class="w-11 h-6 bg-slate-700 peer-focus:ring-2 peer-focus:ring-brand-500/50 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500"></div>
               </label>
               <span class="text-sm text-slate-300">Habilitado (local comercial)</span>
