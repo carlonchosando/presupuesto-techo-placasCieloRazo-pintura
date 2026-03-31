@@ -67,25 +67,58 @@ function calcPaintMaterials(totalArea, wallArea, ceilingArea, zones) {
 }
 
 function calcPlasterMaterials(ceilingArea, zones) {
-  let customPlates = parseInt(document.getElementById('customPlateCount').value) || 0;
-  if (customPlates === 0 && ceilingArea > 0) {
-    customPlates = Math.ceil(ceilingArea / 0.78);
-    document.getElementById('customPlateCount').value = customPlates;
+  // Use manual area if entered, otherwise initialize with zones ceiling area
+  const areaInput = document.getElementById('plasterTotalArea');
+  if (!areaInput.value || parseFloat(areaInput.value) === 0) {
+    areaInput.value = ceilingArea.toFixed(2);
   }
+  const effectiveArea = parseFloat(areaInput.value) || 0;
+
+  const type = document.getElementById('plasterType').value;
   const margin = (parseInt(document.getElementById('breakageMargin').value) || 10) / 100;
-  const totalPlates = Math.ceil(customPlates * (1 + margin));
-  const stdPlates = Math.ceil(totalPlates / 3);
-  const surfaceM2 = totalPlates * 0.78;
+  const areaWithMargin = effectiveArea * (1 + margin);
+  
+  let stdPlates = 0;
+  let surfaceM2 = 0;
+  let customPlatesWithMargin = 0;
+
+  if (type === 'continuo') {
+    stdPlates = Math.ceil(areaWithMargin / 2.88); // 1.20x2.40m = 2.88m2
+    surfaceM2 = stdPlates * 2.88;
+  } else {
+    // Modular
+    const w = parseFloat(document.getElementById('plateWidth').value) || 120;
+    const h = parseFloat(document.getElementById('plateHeight').value) || 65;
+    const plateAreaM2 = (w / 100) * (h / 100);
+    
+    let baseCustomPlates = parseInt(document.getElementById('customPlateCount').value) || 0;
+    if (baseCustomPlates === 0 && plateAreaM2 > 0) {
+      baseCustomPlates = Math.ceil(effectiveArea / plateAreaM2);
+      document.getElementById('customPlateCount').value = baseCustomPlates;
+    }
+    
+    customPlatesWithMargin = Math.ceil(baseCustomPlates * (1 + margin));
+    
+    // Fit calculation inside 120x240 standard plate
+    const fit1 = Math.floor(120 / w) * Math.floor(240 / h);
+    const fit2 = Math.floor(120 / h) * Math.floor(240 / w);
+    const platesPerSheet = Math.max(fit1, fit2, 1);
+    
+    stdPlates = Math.ceil(customPlatesWithMargin / platesPerSheet);
+    surfaceM2 = customPlatesWithMargin * plateAreaM2;
+  }
+
+  const cutsApprox = type === 'continuo' ? stdPlates : customPlatesWithMargin;
 
   const materials = [
-    { name: 'Placa yeso 9.5mm (1200×2400)', qty: stdPlates, unit: 'unidades', price: 0 },
+    { name: 'Placa yeso 9.5mm (1.20×2.40m)', qty: stdPlates, unit: 'unidades', price: 0 },
     { name: 'Masilla tapa juntas', qty: Math.ceil(surfaceM2 / 2.5 * 1.1), unit: 'kg', price: 0 },
-    { name: 'Lija grano 150', qty: Math.ceil(totalPlates / 10), unit: 'hojas', price: 0 },
-    { name: 'Lija grano 220', qty: Math.ceil(totalPlates / 12), unit: 'hojas', price: 0 },
+    { name: 'Lija grano 150', qty: Math.ceil(cutsApprox / (type === 'continuo' ? 4 : 10)), unit: 'hojas', price: 0 },
+    { name: 'Lija grano 220', qty: Math.ceil(cutsApprox / (type === 'continuo' ? 5 : 12)), unit: 'hojas', price: 0 },
     { name: 'Sellador fijador', qty: Math.ceil(surfaceM2 / 10), unit: 'litros', price: 0 },
     { name: 'Pintura látex blanco (2 manos)', qty: Math.ceil(surfaceM2 * 2 / 11), unit: 'litros', price: 0 },
-    { name: 'Hojas trincheta', qty: Math.ceil(totalPlates / 15), unit: 'unidades', price: 0 },
-    { name: 'Barbijos/máscaras', qty: Math.max(1, Math.ceil(totalPlates / 30)), unit: 'unidades', price: 0 },
+    { name: 'Hojas trincheta', qty: Math.ceil(cutsApprox / (type === 'continuo' ? 5 : 15)), unit: 'unidades', price: 0 },
+    { name: 'Barbijos/máscaras', qty: Math.max(1, Math.ceil(cutsApprox / 30)), unit: 'unidades', price: 0 },
     { name: 'Rodillo pelo corto 22cm', qty: 1, unit: 'unidad', price: 0 },
     { name: 'Bandeja rodillo', qty: 1, unit: 'unidad', price: 0 },
   ];

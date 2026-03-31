@@ -119,15 +119,28 @@ function calculateTimeline() {
 
   // Plasterboard stages
   if (bt === 'plasterboard' || bt === 'both') {
-    const customPlates = parseInt(document.getElementById('customPlateCount')?.value) || Math.ceil(totalCeiling / 0.78);
-    const plasterStages = [
-      { name: 'Corte de placas', jornales: customPlates / 35, color: 'bg-amber-500' },
-      { name: 'Aplicación masilla', jornales: customPlates / 30, color: 'bg-orange-400' },
-      { name: 'Lijado placas', jornales: customPlates / 35, color: 'bg-yellow-400' },
-      { name: '1ra mano pintura placas', jornales: customPlates / 45, color: 'bg-sky-400' },
-      { name: '2da mano pintura placas', jornales: customPlates / 50, color: 'bg-sky-500' },
-      { name: 'Control y almacenamiento', jornales: customPlates / 70, color: 'bg-emerald-400' },
-    ];
+    const type = document.getElementById('plasterType')?.value || 'modular';
+    let plasterStages = [];
+    
+    if (type === 'continuo') {
+      const area = parseFloat(document.getElementById('plasterTotalArea')?.value) || totalCeiling;
+      plasterStages = [
+        { name: 'Estructura y emplacado', jornales: area / 15, color: 'bg-amber-500' },
+        { name: 'Tomado de juntas', jornales: area / 20, color: 'bg-orange-400' },
+        { name: 'Lijado general', jornales: area / 30, color: 'bg-yellow-400' },
+        { name: 'Pintura (2 manos)', jornales: area / 25, color: 'bg-sky-400' }
+      ];
+    } else {
+      const customPlates = parseInt(document.getElementById('customPlateCount')?.value) || Math.ceil(totalCeiling / 0.78);
+      plasterStages = [
+        { name: 'Corte de placas', jornales: customPlates / 35, color: 'bg-amber-500' },
+        { name: 'Aplicación masilla', jornales: customPlates / 30, color: 'bg-orange-400' },
+        { name: 'Lijado placas', jornales: customPlates / 35, color: 'bg-yellow-400' },
+        { name: '1ra mano pintura placas', jornales: customPlates / 45, color: 'bg-sky-400' },
+        { name: '2da mano pintura placas', jornales: customPlates / 50, color: 'bg-sky-500' },
+        { name: 'Control/Almacenamiento', jornales: customPlates / 70, color: 'bg-emerald-400' },
+      ];
+    }
     stages = stages.concat(plasterStages);
   }
 
@@ -191,8 +204,14 @@ function getLaborData() {
   }
 
   if (bt === 'plasterboard' || bt === 'both') {
-    const customPlates = parseInt(document.getElementById('customPlateCount')?.value) || Math.ceil(totalCeiling / 0.78);
-    totalJornales += customPlates / 35 + customPlates / 30 + customPlates / 35 + customPlates / 45 + customPlates / 50 + customPlates / 70;
+    const type = document.getElementById('plasterType')?.value || 'modular';
+    if (type === 'continuo') {
+      const area = parseFloat(document.getElementById('plasterTotalArea')?.value) || totalCeiling;
+      totalJornales += (area / 15) + (area / 20) + (area / 30) + (area / 25);
+    } else {
+      const customPlates = parseInt(document.getElementById('customPlateCount')?.value) || Math.ceil(totalCeiling / 0.78);
+      totalJornales += customPlates / 35 + customPlates / 30 + customPlates / 35 + customPlates / 45 + customPlates / 50 + customPlates / 70;
+    }
   }
 
   // Calculate cost: distribute jornales across workers proportionally

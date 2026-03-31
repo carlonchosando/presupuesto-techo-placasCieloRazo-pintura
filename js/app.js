@@ -170,6 +170,33 @@ function toggleBudgetSections() {
   document.getElementById('plasterMaterialsSection').classList.toggle('hidden', t === 'painting');
 }
 
+function togglePlasterFields() {
+  const type = document.getElementById('plasterType').value;
+  const modRow = document.getElementById('modularDimensionsRow');
+  if (type === 'modular') {
+    modRow.classList.remove('hidden');
+    modRow.classList.add('grid');
+    recalcPlasterCount();
+  } else {
+    modRow.classList.add('hidden');
+    modRow.classList.remove('grid');
+  }
+}
+
+function recalcPlasterCount() {
+  const area = parseFloat(document.getElementById('plasterTotalArea').value) || 0;
+  const w = parseFloat(document.getElementById('plateWidth').value) || 120;
+  const h = parseFloat(document.getElementById('plateHeight').value) || 65;
+  const type = document.getElementById('plasterType').value;
+  
+  if (type === 'modular') {
+    const plateAreaM2 = (w / 100) * (h / 100);
+    if (plateAreaM2 > 0) {
+      document.getElementById('customPlateCount').value = Math.ceil(area / plateAreaM2);
+    }
+  }
+}
+
 // ============================================
 // TOAST NOTIFICATIONS
 // ============================================
