@@ -197,7 +197,11 @@ function getLaborData() {
 
   // Calculate cost: distribute jornales across workers proportionally
   const avgRate = workers.length ? workers.reduce((s, w) => s + w.rate, 0) / workers.length : 0;
-  const total = totalJornales * avgRate;
+  
+  // Night work surcharge: 40% extra for nocturnal shifts
+  const nightWork = document.getElementById('nightWork')?.checked || false;
+  const nightSurcharge = nightWork ? 1.4 : 1;
+  const total = totalJornales * avgRate * nightSurcharge;
 
-  return { totalJornales, avgRate, total, workers };
+  return { totalJornales, avgRate, total, workers, nightWork, nightSurcharge };
 }

@@ -95,12 +95,15 @@ function calcPlasterMaterials(ceilingArea, zones) {
 
 function renderMaterialsTable(bodyId, materials, totalId, prefix) {
   const body = document.getElementById(bodyId);
-  // Preserve existing prices
+  // Preserve existing prices and toggle states
   const existingPrices = {};
+  const existingToggles = {};
   body.querySelectorAll('tr').forEach(row => {
-    const nameCell = row.querySelector('td:first-child');
+    const nameCell = row.querySelector('td:nth-child(2)');
     const priceInput = row.querySelector('.material-price-input');
+    const toggle = row.querySelector('.material-toggle');
     if (nameCell && priceInput) existingPrices[nameCell.textContent.trim()] = priceInput.value;
+    if (nameCell && toggle) existingToggles[nameCell.textContent.trim()] = toggle.checked;
   });
 
   // Short unit labels for mobile
@@ -108,15 +111,33 @@ function renderMaterialsTable(bodyId, materials, totalId, prefix) {
 
   body.innerHTML = materials.map((m, i) => {
     const savedPrice = existingPrices[m.name] || m.price || '';
-    const sub = savedPrice ? (parseFloat(savedPrice) * m.qty) : 0;
+    const isChecked = existingToggles[m.name] !== undefined ? existingToggles[m.name] : true;
+    const sub = (savedPrice && isChecked) ? (parseFloat(savedPrice) * m.qty) : 0;
     const u = shortUnit[m.unit] || m.unit;
-    return `<tr class="border-b border-white/5 hover:bg-white/5">
-      <td class="py-2.5 pr-1 text-slate-300 text-sm">${m.name}</td>
-      <td class="py-2.5 px-1 text-center font-semibold text-sm" data-qty="${m.qty}">${m.qty} <span class="text-slate-500 text-xs">${u}</span></td>
-      <td class="py-2.5 px-1" style="width:85px"><input type="number" class="material-price-input" data-prefix="${prefix}" data-idx="${i}" value="${savedPrice}" placeholder="$0" min="0" step="1" inputmode="numeric" oninput="updateMaterialsTotal('${bodyId}','${totalId}')"></td>
-      <td class="py-2.5 pl-1 text-right font-semibold material-subtotal text-sm" style="min-width:75px">${sub > 0 ? fmt(sub) : '-'}</td>
+    const dimClass = isChecked ? '' : 'opacity-30';
+    return `<tr class="border-b border-white/5 hover:bg-white/5 ${dimClass}" data-material-row>
+      <td class="py-2 px-1 text-center" style="width:30px">
+        <input type="checkbox" class="material-toggle" ${isChecked ? 'checked' : ''} onchange="toggleMaterialRow(this, '${bodyId}', '${totalId}')">
+      </td>
+      <td class="py-2 pr-1 text-slate-300 text-sm">${m.name}</td>
+      <td class="py-2 px-1 text-center font-semibold text-sm" data-qty="${m.qty}">${m.qty} <span class="text-slate-500 text-xs">${u}</span></td>
+      <td class="py-2 px-1" style="width:85px"><input type="number" class="material-price-input" data-prefix="${prefix}" data-idx="${i}" value="${savedPrice}" placeholder="$0" min="0" step="1" inputmode="numeric" ${isChecked ? '' : 'disabled'} oninput="updateMaterialsTotal('${bodyId}','${totalId}')"></td>
+      <td class="py-2 pl-1 text-right font-semibold material-subtotal text-sm" style="min-width:75px">${sub > 0 ? fmt(sub) : '-'}</td>
     </tr>`;
   }).join('');
+  updateMaterialsTotal(bodyId, totalId);
+}
+
+function toggleMaterialRow(checkbox, bodyId, totalId) {
+  const row = checkbox.closest('tr');
+  const priceInput = row.querySelector('.material-price-input');
+  if (checkbox.checked) {
+    row.classList.remove('opacity-30');
+    priceInput.disabled = false;
+  } else {
+    row.classList.add('opacity-30');
+    priceInput.disabled = true;
+  }
   updateMaterialsTotal(bodyId, totalId);
 }
 
@@ -124,10 +145,12 @@ function updateMaterialsTotal(bodyId, totalId) {
   const body = document.getElementById(bodyId);
   let total = 0;
   body.querySelectorAll('tr').forEach(row => {
-    const qtyCell = row.querySelector('td:nth-child(2)');
+    const toggle = row.querySelector('.material-toggle');
+    const isActive = toggle ? toggle.checked : true;
+    const qtyCell = row.querySelector('[data-qty]');
     const qty = parseFloat(qtyCell?.dataset.qty) || 0;
     const price = parseFloat(row.querySelector('.material-price-input')?.value) || 0;
-    const sub = qty * price;
+    const sub = isActive ? qty * price : 0;
     row.querySelector('.material-subtotal').textContent = sub > 0 ? fmt(sub) : '-';
     total += sub;
   });
@@ -141,9 +164,13 @@ function getMaterialsData() {
     const body = document.getElementById(bodyId);
     let total = 0;
     body.querySelectorAll('tr').forEach(row => {
-      const name = row.querySelector('td:first-child')?.textContent || '';
-      const qty = parseFloat(row.querySelector('td:nth-child(2)')?.textContent) || 0;
-      const unit = row.querySelector('td:nth-child(3)')?.textContent || '';
+      const toggle = row.querySelector('.material-toggle');
+      const isActive = toggle ? toggle.checked : true;
+      if (!isActive) return; // Skip excluded materials
+      const name = row.querySelector('td:nth-child(2)')?.textContent || '';
+      const qtyCell = row.querySelector('[data-qty]');
+      const qty = parseFloat(qtyCell?.dataset.qty) || 0;
+      const unit = qtyCell?.textContent?.replace(/[0-9.\s]/g, '').trim() || '';
       const price = parseFloat(row.querySelector('.material-price-input')?.value) || 0;
       const sub = qty * price;
       total += sub;

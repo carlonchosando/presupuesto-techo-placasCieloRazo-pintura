@@ -296,8 +296,15 @@ select.form-input option:checked {
 
 .material-price-input:focus {
   outline: none;
-  border-color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.5);
   box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15);
+}
+
+.material-toggle {
+  width: 18px;
+  height: 18px;
+  accent-color: #f59e0b;
+  cursor: pointer;
 }
 
 /* --- Animations --- */

@@ -147,14 +147,17 @@ function bindEvents() {
   document.getElementById('printBtn').addEventListener('click', printBudget);
   document.getElementById('whatsappBtn').addEventListener('click', shareWhatsApp);
   
-  // Night work toggle based on property type
+  // Night work auto-toggle based on property type
   document.getElementById('propertyType').addEventListener('change', (e) => {
-    const nightRow = document.getElementById('nightWork').closest('.form-group');
+    const nightWork = document.getElementById('nightWork');
+    const nightRow = nightWork.closest('.form-group');
     if (e.target.value === 'local') {
+      nightWork.checked = true;
       nightRow.style.opacity = '1';
+      showToast('Trabajo nocturno activado (local comercial)', 'info');
     } else {
+      nightWork.checked = false;
       nightRow.style.opacity = '0.5';
-      document.getElementById('nightWork').checked = false;
     }
   });
 }

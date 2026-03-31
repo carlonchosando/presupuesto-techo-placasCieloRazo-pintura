@@ -134,6 +134,7 @@ function addWorker() {
   APP.workerCounter++;
   const id = 'worker_' + APP.workerCounter;
   const num = document.querySelectorAll('.worker-card').length + 1;
+  const defaultRate = REF_PRICES['oficial'] || 35000;
   const html = `
     <div class="worker-card" id="${id}">
       <div class="flex items-center justify-between mb-3">
@@ -149,7 +150,7 @@ function addWorker() {
         </div>
         <div class="form-group">
           <label class="form-label">Rol</label>
-          <select class="form-input worker-role" onchange="updateWorkerSummary()">
+          <select class="form-input worker-role" onchange="applyWorkerRate(this); updateWorkerSummary()">
             <option value="oficial">Oficial</option>
             <option value="medio_oficial">Medio Oficial</option>
             <option value="ayudante">Ayudante</option>
@@ -157,13 +158,21 @@ function addWorker() {
         </div>
         <div class="form-group">
           <label class="form-label">Jornal ($)</label>
-          <input type="number" class="form-input worker-rate" placeholder="0" min="0" step="100" inputmode="numeric" oninput="updateWorkerSummary()">
+          <input type="number" class="form-input worker-rate" placeholder="0" min="0" step="100" inputmode="numeric" value="${defaultRate}" oninput="updateWorkerSummary()">
         </div>
       </div>
     </div>`;
   document.getElementById('workersContainer').insertAdjacentHTML('beforeend', html);
   updateWorkerSummary();
   if (APP.workerCounter > 1) showToast('Trabajador agregado', 'success');
+}
+
+function applyWorkerRate(selectEl) {
+  const role = selectEl.value;
+  const card = selectEl.closest('.worker-card');
+  const rateInput = card.querySelector('.worker-rate');
+  const refRate = REF_PRICES[role] || 0;
+  if (refRate > 0) rateInput.value = refRate;
 }
 
 function removeWorker(id) {
