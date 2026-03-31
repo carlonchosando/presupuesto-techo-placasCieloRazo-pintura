@@ -29,7 +29,7 @@ const REF_PRICES = {
   'Tornillos T1': 30,                     // por unidad (caja 100 = 3000)
   'Tornillos T2': 35,                     // por unidad (caja 100 = 3500)
   'Cinta papel/tramada': 5000,            // por rollo de 90m
-  'Fijaciones y Tarugo Nº8': 150,         // por par (tarugo+tornillo)
+  'Fijaciones (Tarugo+Tornillo+Arandela)': 180, // por conjunto sumando arandela
   'Alambre galv. Nº14': 3000,             // por kg
   'Hojas trincheta': 500,                 // por unidad
   'Barbijos/máscaras': 600,               // por unidad

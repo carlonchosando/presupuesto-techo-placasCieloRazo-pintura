@@ -124,7 +124,7 @@ function calcPlasterMaterials(ceilingArea, zones) {
       { name: 'Tornillos T1 (Estructura) - 18 un/m²', qty: Math.ceil(surfaceM2 * 18), unit: 'unidades', price: 0 },
       { name: 'Tornillos T2 (Placas) - 20 un/m²', qty: Math.ceil(surfaceM2 * 20), unit: 'unidades', price: 0 },
       { name: 'Cinta papel/tramada (Rollo 90m) - 1.65m/m²', qty: Math.ceil((surfaceM2 * 1.65) / 90), unit: 'rollos', price: 0 },
-      { name: 'Fijaciones y Tarugo Nº8 - 6 un/m²', qty: Math.ceil(surfaceM2 * 6), unit: 'unidades', price: 0 },
+      { name: 'Fijaciones (Tarugo+Tornillo+Arandela) - 2 un/m²', qty: Math.ceil(surfaceM2 * 2), unit: 'unidades', price: 0 },
       { name: 'Alambre galv. Nº14 (Tensores) - 0.15kg/m²', qty: Math.ceil(surfaceM2 * 0.15), unit: 'kg', price: 0 },
     ]);
   } else {
