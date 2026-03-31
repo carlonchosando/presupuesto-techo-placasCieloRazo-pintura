@@ -103,15 +103,18 @@ function renderMaterialsTable(bodyId, materials, totalId, prefix) {
     if (nameCell && priceInput) existingPrices[nameCell.textContent.trim()] = priceInput.value;
   });
 
+  // Short unit labels for mobile
+  const shortUnit = { litros: 'lt', kg: 'kg', hojas: 'hj', rollos: 'rl', unidad: 'un', unidades: 'un' };
+
   body.innerHTML = materials.map((m, i) => {
     const savedPrice = existingPrices[m.name] || m.price || '';
     const sub = savedPrice ? (parseFloat(savedPrice) * m.qty) : 0;
+    const u = shortUnit[m.unit] || m.unit;
     return `<tr class="border-b border-white/5 hover:bg-white/5">
-      <td class="py-2.5 pr-1 text-slate-300 text-sm" style="max-width:120px">${m.name}</td>
-      <td class="py-2.5 px-1 text-center font-semibold w-10">${m.qty}</td>
-      <td class="py-2.5 px-1 text-center text-slate-400 text-xs hidden sm:table-cell">${m.unit}</td>
-      <td class="py-2.5 px-1" style="width:80px"><input type="number" class="material-price-input" data-prefix="${prefix}" data-idx="${i}" value="${savedPrice}" placeholder="$0" min="0" step="1" inputmode="numeric" oninput="updateMaterialsTotal('${bodyId}','${totalId}')"></td>
-      <td class="py-2.5 pl-1 text-right font-semibold material-subtotal text-sm" style="min-width:70px">${sub > 0 ? fmt(sub) : '-'}</td>
+      <td class="py-2.5 pr-1 text-slate-300 text-sm">${m.name}</td>
+      <td class="py-2.5 px-1 text-center font-semibold text-sm" data-qty="${m.qty}">${m.qty} <span class="text-slate-500 text-xs">${u}</span></td>
+      <td class="py-2.5 px-1" style="width:85px"><input type="number" class="material-price-input" data-prefix="${prefix}" data-idx="${i}" value="${savedPrice}" placeholder="$0" min="0" step="1" inputmode="numeric" oninput="updateMaterialsTotal('${bodyId}','${totalId}')"></td>
+      <td class="py-2.5 pl-1 text-right font-semibold material-subtotal text-sm" style="min-width:75px">${sub > 0 ? fmt(sub) : '-'}</td>
     </tr>`;
   }).join('');
   updateMaterialsTotal(bodyId, totalId);
@@ -121,7 +124,8 @@ function updateMaterialsTotal(bodyId, totalId) {
   const body = document.getElementById(bodyId);
   let total = 0;
   body.querySelectorAll('tr').forEach(row => {
-    const qty = parseFloat(row.querySelector('td:nth-child(2)')?.textContent) || 0;
+    const qtyCell = row.querySelector('td:nth-child(2)');
+    const qty = parseFloat(qtyCell?.dataset.qty) || 0;
     const price = parseFloat(row.querySelector('.material-price-input')?.value) || 0;
     const sub = qty * price;
     row.querySelector('.material-subtotal').textContent = sub > 0 ? fmt(sub) : '-';
