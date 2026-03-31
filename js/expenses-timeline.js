@@ -109,16 +109,16 @@ function calculateTimeline() {
   if (bt === 'painting' || bt === 'both') {
     const cf = CONDITION_FACTORS[condition];
     const paintStages = [
-      { name: 'Protección y preparación', jornales: totalArea / 100, color: 'bg-slate-500' },
-      { name: 'Remoción y limpieza', jornales: condition === 'good' ? 0 : totalArea / 30 * cf, color: 'bg-red-500' },
-      { name: 'Reparación de superficies', jornales: condition === 'good' ? totalArea / 50 : totalArea / 20 * cf, color: 'bg-orange-500' },
-      { name: 'Lijado general', jornales: totalArea / 40, color: 'bg-yellow-500' },
-      { name: 'Sellador/Imprimación', jornales: hasSellador ? totalArea / 80 : 0, color: 'bg-lime-500' },
-      { name: 'Enduido (2 manos)', jornales: hasEnduido ? totalArea / 25 * 2 : 0, color: 'bg-green-500' },
-      { name: 'Lijado fino', jornales: hasEnduido ? totalArea / 65 : 0, color: 'bg-teal-500' },
-      { name: 'Pintura (2+ manos)', jornales: totalArea / 50 * (parseInt(document.getElementById('paintCoats')?.value) || 2), color: 'bg-blue-500' },
-      { name: 'Terminaciones', jornales: Math.max(0.5, zones.reduce((s, z) => s + z.doors * 0.2 + z.windows * 0.15, 0)), color: 'bg-indigo-500' },
-      { name: 'Limpieza final', jornales: totalArea / 80, color: 'bg-purple-500' },
+      { name: 'Protección y preparación', jornales: totalArea / 500, color: 'bg-slate-500' },
+      { name: 'Remoción y limpieza', jornales: condition === 'good' ? 0 : totalArea / 500 * cf, color: 'bg-red-500' },
+      { name: 'Reparación de superficies', jornales: condition === 'good' ? totalArea / 600 : totalArea / 300 * cf, color: 'bg-orange-500' },
+      { name: 'Lijado general', jornales: totalArea / 300, color: 'bg-yellow-500' },
+      { name: 'Sellador/Imprimación', jornales: hasSellador ? totalArea / 300 : 0, color: 'bg-lime-500' },
+      { name: 'Enduido (2 manos)', jornales: hasEnduido ? totalArea / 70 * 2 : 0, color: 'bg-green-500' },
+      { name: 'Lijado fino', jornales: hasEnduido ? totalArea / 100 : 0, color: 'bg-teal-500' },
+      { name: 'Pintura (2+ manos)', jornales: totalArea / 200 * (parseInt(document.getElementById('paintCoats')?.value) || 2), color: 'bg-blue-500' },
+      { name: 'Terminaciones', jornales: Math.max(0.2, zones.reduce((s, z) => s + z.doors * 0.1 + z.windows * 0.05, 0)), color: 'bg-indigo-500' },
+      { name: 'Limpieza final', jornales: totalArea / 600, color: 'bg-purple-500' },
     ];
     stages = stages.concat(paintStages);
   }
@@ -131,20 +131,20 @@ function calculateTimeline() {
     if (type === 'continuo') {
       const area = parseFloat(document.getElementById('plasterTotalArea')?.value) || totalCeiling;
       plasterStages = [
-        { name: 'Estructura y emplacado', jornales: area / 15, color: 'bg-amber-500' },
-        { name: 'Tomado de juntas', jornales: area / 20, color: 'bg-orange-400' },
-        { name: 'Lijado general', jornales: area / 30, color: 'bg-yellow-400' },
-        { name: 'Pintura (2 manos)', jornales: area / 25, color: 'bg-sky-400' }
+        { name: 'Estructura y emplacado', jornales: area / 30, color: 'bg-amber-500' },
+        { name: 'Tomado de juntas', jornales: area / 40, color: 'bg-orange-400' },
+        { name: 'Lijado general', jornales: area / 60, color: 'bg-yellow-400' },
+        { name: 'Pintura (2 manos)', jornales: area / 100, color: 'bg-sky-400' }
       ];
     } else {
       const customPlates = parseInt(document.getElementById('customPlateCount')?.value) || Math.ceil(totalCeiling / 0.78);
       plasterStages = [
-        { name: 'Corte de placas', jornales: customPlates / 35, color: 'bg-amber-500' },
-        { name: 'Aplicación masilla', jornales: customPlates / 30, color: 'bg-orange-400' },
-        { name: 'Lijado placas', jornales: customPlates / 35, color: 'bg-yellow-400' },
-        { name: '1ra mano pintura placas', jornales: customPlates / 45, color: 'bg-sky-400' },
-        { name: '2da mano pintura placas', jornales: customPlates / 50, color: 'bg-sky-500' },
-        { name: 'Control/Almacenamiento', jornales: customPlates / 70, color: 'bg-emerald-400' },
+        { name: 'Corte de placas', jornales: customPlates / 70, color: 'bg-amber-500' },
+        { name: 'Aplicación masilla', jornales: customPlates / 60, color: 'bg-orange-400' },
+        { name: 'Lijado placas', jornales: customPlates / 70, color: 'bg-yellow-400' },
+        { name: '1ra mano pintura placas', jornales: customPlates / 100, color: 'bg-sky-400' },
+        { name: '2da mano pintura placas', jornales: customPlates / 120, color: 'bg-sky-500' },
+        { name: 'Control/Almacenamiento', jornales: customPlates / 150, color: 'bg-emerald-400' },
       ];
     }
     stages = stages.concat(plasterStages);
@@ -213,27 +213,27 @@ function getLaborData() {
     const hasSellador = allMats.some(m => m.name.toLowerCase().includes('sellador'));
     const hasEnduido = allMats.some(m => m.name.toLowerCase().includes('enduido'));
 
-    totalJornales += totalArea / 100; // Protección
-    totalJornales += condition !== 'good' ? totalArea / 30 * cf : 0; // Remoción
-    totalJornales += condition === 'good' ? totalArea / 50 : totalArea / 20 * cf; // Reparación
-    totalJornales += totalArea / 40; // Lijado
-    totalJornales += hasSellador ? totalArea / 80 : 0; // Sellador
-    totalJornales += hasEnduido ? totalArea / 25 * 2 : 0; // Enduido
-    totalJornales += hasEnduido ? totalArea / 65 : 0; // Lijado fino
+    totalJornales += totalArea / 500; // Protección
+    totalJornales += condition !== 'good' ? totalArea / 500 * cf : 0; // Remoción
+    totalJornales += condition === 'good' ? totalArea / 600 : totalArea / 300 * cf; // Reparación
+    totalJornales += totalArea / 300; // Lijado
+    totalJornales += hasSellador ? totalArea / 300 : 0; // Sellador
+    totalJornales += hasEnduido ? totalArea / 70 * 2 : 0; // Enduido
+    totalJornales += hasEnduido ? totalArea / 100 : 0; // Lijado fino
     const coats = parseInt(document.getElementById('paintCoats')?.value) || 2;
-    totalJornales += totalArea / 50 * coats; // Pintura
-    totalJornales += Math.max(0.5, zones.reduce((s, z) => s + z.doors * 0.2 + z.windows * 0.15, 0));
-    totalJornales += totalArea / 80; // Limpieza
+    totalJornales += totalArea / 200 * coats; // Pintura
+    totalJornales += Math.max(0.2, zones.reduce((s, z) => s + z.doors * 0.1 + z.windows * 0.05, 0));
+    totalJornales += totalArea / 600; // Limpieza
   }
 
   if (bt === 'plasterboard' || bt === 'both') {
     const type = document.getElementById('plasterType')?.value || 'modular';
     if (type === 'continuo') {
       const area = parseFloat(document.getElementById('plasterTotalArea')?.value) || totalCeiling;
-      totalJornales += (area / 15) + (area / 20) + (area / 30) + (area / 25);
+      totalJornales += (area / 30) + (area / 40) + (area / 60) + (area / 100);
     } else {
       const customPlates = parseInt(document.getElementById('customPlateCount')?.value) || Math.ceil(totalCeiling / 0.78);
-      totalJornales += customPlates / 35 + customPlates / 30 + customPlates / 35 + customPlates / 45 + customPlates / 50 + customPlates / 70;
+      totalJornales += customPlates / 70 + customPlates / 60 + customPlates / 70 + customPlates / 100 + customPlates / 120 + customPlates / 150;
     }
   }
 
