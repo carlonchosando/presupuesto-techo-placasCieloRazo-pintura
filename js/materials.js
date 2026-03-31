@@ -107,11 +107,11 @@ function renderMaterialsTable(bodyId, materials, totalId, prefix) {
     const savedPrice = existingPrices[m.name] || m.price || '';
     const sub = savedPrice ? (parseFloat(savedPrice) * m.qty) : 0;
     return `<tr class="border-b border-white/5 hover:bg-white/5">
-      <td class="py-2.5 pr-2 text-slate-300">${m.name}</td>
-      <td class="py-2.5 px-2 text-center font-semibold">${m.qty}</td>
-      <td class="py-2.5 px-2 text-center text-slate-400">${m.unit}</td>
-      <td class="py-2.5 px-2"><input type="number" class="material-price-input" data-prefix="${prefix}" data-idx="${i}" value="${savedPrice}" placeholder="$0" min="0" step="1" inputmode="numeric" oninput="updateMaterialsTotal('${bodyId}','${totalId}')"></td>
-      <td class="py-2.5 pl-2 text-right font-semibold material-subtotal">${sub > 0 ? fmt(sub) : '-'}</td>
+      <td class="py-2.5 pr-1 text-slate-300 text-sm" style="max-width:120px">${m.name}</td>
+      <td class="py-2.5 px-1 text-center font-semibold w-10">${m.qty}</td>
+      <td class="py-2.5 px-1 text-center text-slate-400 text-xs hidden sm:table-cell">${m.unit}</td>
+      <td class="py-2.5 px-1" style="width:80px"><input type="number" class="material-price-input" data-prefix="${prefix}" data-idx="${i}" value="${savedPrice}" placeholder="$0" min="0" step="1" inputmode="numeric" oninput="updateMaterialsTotal('${bodyId}','${totalId}')"></td>
+      <td class="py-2.5 pl-1 text-right font-semibold material-subtotal text-sm" style="min-width:70px">${sub > 0 ? fmt(sub) : '-'}</td>
     </tr>`;
   }).join('');
   updateMaterialsTotal(bodyId, totalId);
