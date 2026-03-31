@@ -19,24 +19,37 @@ function addZone() {
           <label class="form-label">Nombre de la zona</label>
           <input type="text" class="form-input zone-name" placeholder="Ej: Ingreso, Living, Dormitorio" oninput="updateZoneSummary()">
         </div>
-        <div class="grid grid-cols-2 gap-3">
+        <div class="mb-2"><span class="text-xs font-semibold text-brand-300">📐 PAREDES</span></div>
+        <div class="grid grid-cols-2 gap-3 mb-1">
           <div class="form-group">
-            <label class="form-label">Paredes Netas (m²)</label>
-            <input type="number" class="form-input zone-wall" placeholder="0.00" min="0" step="0.01" inputmode="decimal" oninput="updateZoneSummary()">
+            <label class="form-label">Largo total / Perímetro (m)</label>
+            <input type="number" class="form-input zone-wall-width" placeholder="0.00" min="0" step="0.01" inputmode="decimal" oninput="updateZoneSummary()">
           </div>
           <div class="form-group">
-            <label class="form-label">Cielorraso (m²)</label>
-            <input type="number" class="form-input zone-ceiling" placeholder="0.00" min="0" step="0.01" inputmode="decimal" oninput="updateZoneSummary()">
+            <label class="form-label">Alto (m)</label>
+            <input type="number" class="form-input zone-wall-height" placeholder="0.00" min="0" step="0.01" value="2.60" inputmode="decimal" oninput="updateZoneSummary()">
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-2 gap-3 mb-4">
           <div class="form-group">
             <label class="form-label text-slate-400">Puertas (cant.)</label>
-            <input type="number" class="form-input zone-doors" value="0" min="0" step="1" inputmode="numeric" oninput="updateZoneSummary()" title="Sirve para cálculo de cinta de enmascarar">
+            <input type="number" class="form-input zone-doors" value="0" min="0" step="1" inputmode="numeric" oninput="updateZoneSummary()" title="Se descuentan de la pared">
           </div>
           <div class="form-group">
             <label class="form-label text-slate-400">Ventanas (cant.)</label>
-            <input type="number" class="form-input zone-windows" value="0" min="0" step="1" inputmode="numeric" oninput="updateZoneSummary()" title="Sirve para cálculo de cinta de enmascarar">
+            <input type="number" class="form-input zone-windows" value="0" min="0" step="1" inputmode="numeric" oninput="updateZoneSummary()" title="Se descuentan de la pared">
+          </div>
+        </div>
+
+        <div class="mb-2"><span class="text-xs font-semibold text-blue-300">🔲 CIELORRASO</span></div>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div class="form-group">
+            <label class="form-label">Largo (m)</label>
+            <input type="number" class="form-input zone-ceil-width" placeholder="0.00" min="0" step="0.01" inputmode="decimal" oninput="updateZoneSummary()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ancho (m)</label>
+            <input type="number" class="form-input zone-ceil-depth" placeholder="0.00" min="0" step="0.01" inputmode="decimal" oninput="updateZoneSummary()">
           </div>
         </div>
         <div class="p-2 rounded-lg bg-brand-500/10 text-center flex justify-around">
@@ -71,14 +84,20 @@ function toggleCeiling(checkbox, zoneId) {
 function getZonesData() {
   const zones = [];
   document.querySelectorAll('.zone-card').forEach(card => {
-    const wallArea = parseFloat(card.querySelector('.zone-wall')?.value) || 0;
-    const ceilingArea = parseFloat(card.querySelector('.zone-ceiling')?.value) || 0;
+    const ww = parseFloat(card.querySelector('.zone-wall-width')?.value) || 0;
+    const wh = parseFloat(card.querySelector('.zone-wall-height')?.value) || 0;
+    const cw = parseFloat(card.querySelector('.zone-ceil-width')?.value) || 0;
+    const cd = parseFloat(card.querySelector('.zone-ceil-depth')?.value) || 0;
     const doors = parseInt(card.querySelector('.zone-doors')?.value) || 0;
     const windows = parseInt(card.querySelector('.zone-windows')?.value) || 0;
     
+    const wallArea = Math.max(0, (ww * wh) - (doors * 1.60) - (windows * 1.80));
+    const ceilingArea = cw * cd;
+
     zones.push({
       name: card.querySelector('.zone-name')?.value || `Zona ${zones.length + 1}`,
-      wallArea, ceilingArea, doors, windows,
+      ww, wh, cw, cd, doors, windows, // Expose raw dims for PDF
+      wallArea, ceilingArea,
       totalArea: wallArea + ceilingArea
     });
   });
@@ -188,8 +207,8 @@ function getWorkersData() {
 function updateWorkerSummary() {
   const workers = getWorkersData();
   document.getElementById('totalWorkers').textContent = workers.length;
-  const avg = workers.length ? workers.reduce((s, w) => s + w.rate, 0) / workers.length : 0;
-  document.getElementById('avgDailyRate').textContent = fmt(avg);
+  const totalRate = workers.reduce((s, w) => s + w.rate, 0);
+  document.getElementById('avgDailyRate').textContent = fmt(totalRate);
   const summary = document.getElementById('workerSummary');
   summary.classList.toggle('hidden', workers.length === 0);
 }

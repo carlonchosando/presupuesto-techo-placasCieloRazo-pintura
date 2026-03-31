@@ -60,12 +60,14 @@ function renderPreview() {
     <div class="preview-section">
       <h2>📐 RELEVAMIENTO DE SUPERFICIES</h2>
       <table class="preview-table">
-        <thead><tr><th>Zona</th><th class="text-center">Largo</th><th class="text-center">Alto</th><th class="text-center">Puert.</th><th class="text-center">Vent.</th><th class="text-right">m² Pared</th><th class="text-right">m² Techo</th></tr></thead>
+        <thead><tr><th>Zona</th><th class="text-center">Pared (LxA)</th><th class="text-center">Techo (LxH)</th><th class="text-center">Puert.</th><th class="text-center">Vent.</th><th class="text-right">m² Pared</th><th class="text-right">m² Techo</th></tr></thead>
         <tbody>
           ${zones.map(z => `<tr>
-            <td>${z.name}</td><td class="text-center">${fmtNum(z.width)}</td><td class="text-center">${fmtNum(z.height)}</td>
+            <td>${z.name}</td>
+            <td class="text-center">${z.ww > 0 ? fmtNum(z.ww)+'x'+fmtNum(z.wh) : '-'}</td>
+            <td class="text-center">${z.cw > 0 ? fmtNum(z.cw)+'x'+fmtNum(z.cd) : '-'}</td>
             <td class="text-center">${z.doors}</td><td class="text-center">${z.windows}</td>
-            <td class="text-right">${fmtNum(z.wallArea)}</td><td class="text-right">${z.hasCeiling ? fmtNum(z.ceilingArea) : '-'}</td>
+            <td class="text-right">${fmtNum(z.wallArea)}</td><td class="text-right">${z.ceilingArea > 0 ? fmtNum(z.ceilingArea) : '-'}</td>
           </tr>`).join('')}
           <tr class="total-row"><td colspan="5">TOTAL</td><td class="text-right">${fmtNum(totalWall)} m²</td><td class="text-right">${fmtNum(totalCeiling)} m²</td></tr>
         </tbody>
@@ -230,10 +232,10 @@ function shareWhatsApp() {
   L.push(``);
   zones.forEach(z => {
     L.push(`▪️ *${z.name}*`);
-    L.push(`   ${fmtNum(z.width)}m × ${fmtNum(z.height)}m = *${fmtNum(z.wallArea)} m²*`);
+    if (z.wallArea > 0) L.push(`   🧱 Paredes: ${z.ww > 0 ? fmtNum(z.ww)+'×'+fmtNum(z.wh)+'m = ' : ''}*${fmtNum(z.wallArea)} m²*`);
     if (z.doors > 0) L.push(`   🚪 ${z.doors} puerta${z.doors > 1 ? 's' : ''}`);
     if (z.windows > 0) L.push(`   🪟 ${z.windows} ventana${z.windows > 1 ? 's' : ''}`);
-    if (z.hasCeiling && z.ceilingArea > 0) L.push(`   ⬜ Techo: ${fmtNum(z.ceilingArea)} m²`);
+    if (z.ceilingArea > 0) L.push(`   ⬜ Techo: ${z.cw > 0 ? fmtNum(z.cw)+'×'+fmtNum(z.cd)+'m = ' : ''}*${fmtNum(z.ceilingArea)} m²*`);
     L.push(``);
   });
   L.push(`   📊 *Total paredes:* ${fmtNum(totalWall)} m²`);
