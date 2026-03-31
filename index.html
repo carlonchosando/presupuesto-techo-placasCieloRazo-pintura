@@ -258,11 +258,20 @@
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label" for="surfaceCondition">Estado general superficies</label>
+              <label class="form-label" for="surfaceCondition">Estado Gral. Superficies</label>
               <select id="surfaceCondition" class="form-input">
                 <option value="good">Bueno</option>
                 <option value="regular" selected>Regular</option>
                 <option value="bad">Malo</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ceilingPaintType">Cielorraso (Tipo de Pintura)</label>
+              <select id="ceilingPaintType" class="form-input" onchange="if(typeof calculateMaterials==='function') calculateMaterials()">
+                <option value="general" selected>Englobar con las paredes</option>
+                <option value="none">No pintar cielorrasos</option>
+                <option value="losa">Losa (Sin sellador, pin. especial)</option>
+                <option value="durlock">Placas Durlock (pin. especial)</option>
               </select>
             </div>
           </div>

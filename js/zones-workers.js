@@ -21,40 +21,27 @@ function addZone() {
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div class="form-group">
-            <label class="form-label">Largo (m)</label>
-            <input type="number" class="form-input zone-width" placeholder="0.00" min="0" step="0.01" inputmode="decimal" oninput="updateZoneSummary()">
+            <label class="form-label">Paredes Netas (m²)</label>
+            <input type="number" class="form-input zone-wall" placeholder="0.00" min="0" step="0.01" inputmode="decimal" oninput="updateZoneSummary()">
           </div>
           <div class="form-group">
-            <label class="form-label">Alto (m)</label>
-            <input type="number" class="form-input zone-height" placeholder="2.60" min="0" step="0.01" value="2.60" inputmode="decimal" oninput="updateZoneSummary()">
+            <label class="form-label">Cielorraso (m²)</label>
+            <input type="number" class="form-input zone-ceiling" placeholder="0.00" min="0" step="0.01" inputmode="decimal" oninput="updateZoneSummary()">
           </div>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div class="form-group">
-            <label class="form-label">Puertas (cant.)</label>
-            <input type="number" class="form-input zone-doors" value="0" min="0" step="1" inputmode="numeric" oninput="updateZoneSummary()">
+            <label class="form-label text-slate-400">Puertas (cant.)</label>
+            <input type="number" class="form-input zone-doors" value="0" min="0" step="1" inputmode="numeric" oninput="updateZoneSummary()" title="Sirve para cálculo de cinta de enmascarar">
           </div>
           <div class="form-group">
-            <label class="form-label">Ventanas (cant.)</label>
-            <input type="number" class="form-input zone-windows" value="0" min="0" step="1" inputmode="numeric" oninput="updateZoneSummary()">
+            <label class="form-label text-slate-400">Ventanas (cant.)</label>
+            <input type="number" class="form-input zone-windows" value="0" min="0" step="1" inputmode="numeric" oninput="updateZoneSummary()" title="Sirve para cálculo de cinta de enmascarar">
           </div>
         </div>
-        <div class="flex items-center gap-3 p-3 rounded-lg bg-white/5">
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" class="sr-only peer zone-ceiling-check" onchange="toggleCeiling(this, '${id}')">
-            <div class="w-11 h-6 bg-slate-700 peer-focus:ring-2 peer-focus:ring-brand-500/50 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500"></div>
-          </label>
-          <span class="text-sm text-slate-300">Incluir techo</span>
-        </div>
-        <div class="ceiling-fields hidden" id="${id}_ceiling">
-          <div class="form-group">
-            <label class="form-label">Ancho del techo (m)</label>
-            <input type="number" class="form-input zone-ceiling-width" placeholder="0.00" min="0" step="0.01" inputmode="decimal" oninput="updateZoneSummary()">
-          </div>
-        </div>
-        <div class="p-2 rounded-lg bg-brand-500/10 text-center">
-          <span class="text-xs text-slate-400">Superficie paredes: </span>
-          <span class="text-sm font-bold text-brand-400 zone-area-display">0.00 m²</span>
+        <div class="p-2 rounded-lg bg-brand-500/10 text-center flex justify-around">
+          <div><span class="text-xs text-slate-400">Paredes: </span><span class="text-sm font-bold text-brand-400 zone-wall-display">0.00 m²</span></div>
+          <div><span class="text-xs text-slate-400">Cielorraso: </span><span class="text-sm font-bold text-blue-400 zone-ceiling-display">0.00 m²</span></div>
         </div>
       </div>
     </div>`;
@@ -78,26 +65,20 @@ function renumberZones() {
 }
 
 function toggleCeiling(checkbox, zoneId) {
-  document.getElementById(zoneId + '_ceiling').classList.toggle('hidden', !checkbox.checked);
-  updateZoneSummary();
+  // Legacy function kept for interface safety if referenced elsewhere, but unused now
 }
 
 function getZonesData() {
   const zones = [];
   document.querySelectorAll('.zone-card').forEach(card => {
-    const w = parseFloat(card.querySelector('.zone-width')?.value) || 0;
-    const h = parseFloat(card.querySelector('.zone-height')?.value) || 0;
+    const wallArea = parseFloat(card.querySelector('.zone-wall')?.value) || 0;
+    const ceilingArea = parseFloat(card.querySelector('.zone-ceiling')?.value) || 0;
     const doors = parseInt(card.querySelector('.zone-doors')?.value) || 0;
     const windows = parseInt(card.querySelector('.zone-windows')?.value) || 0;
-    const hasCeiling = card.querySelector('.zone-ceiling-check')?.checked || false;
-    const cw = parseFloat(card.querySelector('.zone-ceiling-width')?.value) || 0;
-    const wallArea = Math.max(0, (w * h) - (doors * 1.60) - (windows * 1.80));
-    const ceilingArea = hasCeiling ? w * cw : 0;
+    
     zones.push({
       name: card.querySelector('.zone-name')?.value || `Zona ${zones.length + 1}`,
-      width: w, height: h, doors, windows,
-      hasCeiling, ceilingWidth: cw,
-      wallArea, ceilingArea,
+      wallArea, ceilingArea, doors, windows,
       totalArea: wallArea + ceilingArea
     });
   });
@@ -109,7 +90,10 @@ function updateZoneSummary() {
   // Update individual zone displays
   document.querySelectorAll('.zone-card').forEach((card, i) => {
     if (zones[i]) {
-      card.querySelector('.zone-area-display').textContent = fmtNum(zones[i].wallArea) + ' m²';
+      const wD = card.querySelector('.zone-wall-display');
+      if(wD) wD.textContent = fmtNum(zones[i].wallArea) + ' m²';
+      const cD = card.querySelector('.zone-ceiling-display');
+      if(cD) cD.textContent = fmtNum(zones[i].ceilingArea) + ' m²';
     }
   });
   // Update totals

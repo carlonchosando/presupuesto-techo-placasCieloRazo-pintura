@@ -10,6 +10,10 @@ const REF_PRICES = {
   'Enduido plástico': 6000,         // por kg
   'Pintura látex (2 manos)': 5500,  // por litro (calidad media)
   'Pintura látex (3 manos)': 5500,
+  'Pintura Cielorraso Losa (2 manos)': 6000,
+  'Pintura Cielorraso Losa (3 manos)': 6000,
+  'Pintura Cielorraso Placas (2 manos)': 6500,
+  'Pintura Cielorraso Placas (3 manos)': 6500,
   'Lija grano 80': 800,             // por hoja
   'Lija grano 150': 800,
   'Lija grano 220': 900,

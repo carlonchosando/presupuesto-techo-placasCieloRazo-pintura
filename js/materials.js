@@ -32,9 +32,11 @@ function calculateMaterials() {
 }
 
 function calcPaintMaterials(totalArea, wallArea, ceilingArea, zones) {
-  const quality = document.getElementById('paintQuality').value;
-  const coats = parseInt(document.getElementById('paintCoats').value) || 2;
-  const condition = document.getElementById('surfaceCondition').value;
+  const quality = document.getElementById('paintQuality')?.value || 'medium';
+  const coats = parseInt(document.getElementById('paintCoats')?.value) || 2;
+  const condition = document.getElementById('surfaceCondition')?.value || 'regular';
+  const ceilingType = document.getElementById('ceilingPaintType')?.value || 'general';
+  
   const cf = CONDITION_FACTORS[condition];
   const py = PAINT_YIELDS[quality];
   const waste = condition === 'bad' ? 1.15 : 1.10;
@@ -43,20 +45,55 @@ function calcPaintMaterials(totalArea, wallArea, ceilingArea, zones) {
   const totalWindows = zones.reduce((s, z) => s + z.windows, 0);
   const perimAberturas = (totalDoors * 5.6) + (totalWindows * 5.4);
 
-  const materials = [
-    { name: 'Sellador fijador', qty: Math.ceil((totalArea / 10) * waste), unit: 'litros', price: 0 },
-    { name: 'Enduido plástico', qty: Math.ceil((totalArea / 2) * cf * waste), unit: 'kg', price: 0 },
-    { name: `Pintura látex (${coats} manos)`, qty: Math.ceil((totalArea * coats / py.yield) * waste), unit: 'litros', price: 0 },
-    { name: 'Lija grano 80', qty: Math.ceil(totalArea * cf / 4), unit: 'hojas', price: 0 },
-    { name: 'Lija grano 150', qty: Math.ceil(totalArea / 6.5), unit: 'hojas', price: 0 },
-    { name: 'Lija grano 220', qty: Math.ceil(totalArea / 8), unit: 'hojas', price: 0 },
+  // Determine computation areas based on scoping
+  let sealerArea = totalArea;
+  let latexArea = totalArea;
+  let enduidoArea = totalArea;
+  
+  if (ceilingType === 'none') {
+    sealerArea = wallArea;
+    latexArea = wallArea;
+    enduidoArea = wallArea;
+  } else if (ceilingType === 'losa' || ceilingType === 'durlock') {
+    sealerArea = wallArea; // Ceilings don't use sealer
+    latexArea = wallArea;  // Handled specifically later
+    // enduido we might reduce for ceilings or keep. Usually you patch ceilings, but less:
+    enduidoArea = wallArea + (ceilingArea * 0.5); 
+  }
+
+  const materials = [];
+  
+  if (sealerArea > 0) {
+    materials.push({ name: 'Sellador fijador', qty: Math.ceil((sealerArea / 10) * waste), unit: 'litros', price: 0 });
+  }
+  
+  if (enduidoArea > 0) {
+    materials.push({ name: 'Enduido plástico', qty: Math.ceil((enduidoArea / 2) * cf * waste), unit: 'kg', price: 0 });
+  }
+  
+  if (latexArea > 0) {
+    materials.push({ name: `Pintura látex (${coats} manos)`, qty: Math.ceil((latexArea * coats / py.yield) * waste), unit: 'litros', price: 0 });
+  }
+  
+  // Specific ceiling paints
+  if (ceilingArea > 0 && ceilingType === 'losa') {
+    materials.push({ name: `Pintura Cielorraso Losa (${coats} manos)`, qty: Math.ceil((ceilingArea * coats / 10) * waste), unit: 'litros', price: 0 });
+  } else if (ceilingArea > 0 && ceilingType === 'durlock') {
+    materials.push({ name: `Pintura Cielorraso Placas (${coats} manos)`, qty: Math.ceil((ceilingArea * coats / 10) * waste), unit: 'litros', price: 0 });
+  }
+
+  // Push remaining tools
+  materials.push(
+    { name: 'Lija grano 80', qty: Math.max(1, Math.ceil(totalArea * cf / 4)), unit: 'hojas', price: 0 },
+    { name: 'Lija grano 150', qty: Math.max(1, Math.ceil(totalArea / 6.5)), unit: 'hojas', price: 0 },
+    { name: 'Lija grano 220', qty: Math.max(1, Math.ceil(totalArea / 8)), unit: 'hojas', price: 0 },
     { name: 'Cinta enmascarar', qty: Math.max(1, Math.ceil(perimAberturas / 25)), unit: 'rollos', price: 0 },
     { name: 'Nylon protector', qty: Math.max(1, Math.ceil(ceilingArea / 100)), unit: 'rollos', price: 0 },
     { name: 'Espátula 250mm', qty: 1, unit: 'unidad', price: 0 },
     { name: 'Rodillo lana 22cm', qty: 1, unit: 'unidad', price: 0 },
     { name: 'Bandeja rodillo', qty: 1, unit: 'unidad', price: 0 },
-    { name: 'Pincel 2"', qty: 1, unit: 'unidad', price: 0 },
-  ];
+    { name: 'Pincel 2"', qty: 1, unit: 'unidad', price: 0 }
+  );
 
   if (totalDoors > 0 || totalWindows > 0) {
     const esmalteLt = Math.ceil(((totalDoors * 3.2) + (totalWindows * 2.4)) / 11 * waste);
