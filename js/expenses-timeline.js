@@ -96,6 +96,12 @@ function calculateTimeline() {
   const condition = document.getElementById('surfaceCondition')?.value || 'regular';
   const numWorkers = Math.max(1, workers.length);
 
+  // Extract active materials to filter labor stages
+  const activeMats = getMaterialsData();
+  const allMats = [...activeMats.paint, ...activeMats.plaster];
+  const hasSellador = allMats.some(m => m.name.toLowerCase().includes('sellador'));
+  const hasEnduido = allMats.some(m => m.name.toLowerCase().includes('enduido'));
+
   let stages = [];
   let totalJornales = 0;
 
@@ -107,9 +113,9 @@ function calculateTimeline() {
       { name: 'Remoción y limpieza', jornales: condition === 'good' ? 0 : totalArea / 30 * cf, color: 'bg-red-500' },
       { name: 'Reparación de superficies', jornales: condition === 'good' ? totalArea / 50 : totalArea / 20 * cf, color: 'bg-orange-500' },
       { name: 'Lijado general', jornales: totalArea / 40, color: 'bg-yellow-500' },
-      { name: 'Sellador/Imprimación', jornales: totalArea / 80, color: 'bg-lime-500' },
-      { name: 'Enduido (2 manos)', jornales: totalArea / 25 * 2, color: 'bg-green-500' },
-      { name: 'Lijado fino', jornales: totalArea / 65, color: 'bg-teal-500' },
+      { name: 'Sellador/Imprimación', jornales: hasSellador ? totalArea / 80 : 0, color: 'bg-lime-500' },
+      { name: 'Enduido (2 manos)', jornales: hasEnduido ? totalArea / 25 * 2 : 0, color: 'bg-green-500' },
+      { name: 'Lijado fino', jornales: hasEnduido ? totalArea / 65 : 0, color: 'bg-teal-500' },
       { name: 'Pintura (2+ manos)', jornales: totalArea / 50 * (parseInt(document.getElementById('paintCoats')?.value) || 2), color: 'bg-blue-500' },
       { name: 'Terminaciones', jornales: Math.max(0.5, zones.reduce((s, z) => s + z.doors * 0.2 + z.windows * 0.15, 0)), color: 'bg-indigo-500' },
       { name: 'Limpieza final', jornales: totalArea / 80, color: 'bg-purple-500' },
@@ -190,13 +196,18 @@ function getLaborData() {
   let totalJornales = 0;
 
   if (bt === 'painting' || bt === 'both') {
+    const activeMats = getMaterialsData();
+    const allMats = [...activeMats.paint, ...activeMats.plaster];
+    const hasSellador = allMats.some(m => m.name.toLowerCase().includes('sellador'));
+    const hasEnduido = allMats.some(m => m.name.toLowerCase().includes('enduido'));
+
     totalJornales += totalArea / 100; // Protección
     totalJornales += condition !== 'good' ? totalArea / 30 * cf : 0; // Remoción
     totalJornales += condition === 'good' ? totalArea / 50 : totalArea / 20 * cf; // Reparación
     totalJornales += totalArea / 40; // Lijado
-    totalJornales += totalArea / 80; // Sellador
-    totalJornales += totalArea / 25 * 2; // Enduido
-    totalJornales += totalArea / 65; // Lijado fino
+    totalJornales += hasSellador ? totalArea / 80 : 0; // Sellador
+    totalJornales += hasEnduido ? totalArea / 25 * 2 : 0; // Enduido
+    totalJornales += hasEnduido ? totalArea / 65 : 0; // Lijado fino
     const coats = parseInt(document.getElementById('paintCoats')?.value) || 2;
     totalJornales += totalArea / 50 * coats; // Pintura
     totalJornales += Math.max(0.5, zones.reduce((s, z) => s + z.doors * 0.2 + z.windows * 0.15, 0));
